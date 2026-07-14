@@ -12,7 +12,6 @@ fi
 if [ ! -f /home/ubuntu/.vnc/xstartup ]; then
     cat > /home/ubuntu/.vnc/xstartup << 'EOF'
 #!/bin/bash
-xrdb $HOME/.Xresources
 startlxde &
 EOF
     chmod +x /home/ubuntu/.vnc/xstartup
