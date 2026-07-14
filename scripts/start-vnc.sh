@@ -30,11 +30,9 @@ rm -f /tmp/.X11-unix/X1
 rm -f /home/ubuntu/.vnc/*.log
 rm -f /home/ubuntu/.vnc/*.pid
 
-exec Xtigervnc :1 \
+exec vncserver :1 \
     -rfbport ${VNC_PORT} \
     -geometry ${VNC_RESOLUTION} \
     -depth ${VNC_DEPTH} \
     -localhost no \
-    -SecurityTypes VncAuth \
-    -PasswordFile /home/ubuntu/.vnc/passwd \
-    -xstartup /home/ubuntu/.vnc/xstartup
+    -SecurityTypes VncAuth
