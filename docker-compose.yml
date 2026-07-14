@@ -1,4 +1,4 @@
-version: '3.5'
+version: '2.4'
 services:
   ubuntu-desktop:
     build:
@@ -15,9 +15,3 @@ services:
     volumes:
       - ./data/home:/home/ubuntu
       - ./data/shared:/shared
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6901/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
