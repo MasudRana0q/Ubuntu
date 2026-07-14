@@ -33,13 +33,25 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh scripts/docker-com
 
 ### Step 4: Connect!
 
-#### Option A: With a VNC Client (Recommended for Mobile)
-1. Install a VNC client like **AVNC** (Android) or **RealVNC Viewer** (iOS/Android)
-2. Add a new connection:
-   - Host: `localhost` (or your server's IP address)
-   - Port: `5900`
-   - Password: `ubuntu`
-3. Connect!
+#### Option A: With a Mobile VNC Client (Recommended for Mobile)
+**Important Note**: This requires your container to be running on a machine with a **public IP address** (like a Google Compute Engine VM or another VPS). Google Cloud Shell does NOT expose ports to the public internet, so you can't use a mobile VNC client directly with Cloud Shell.
+
+1. **Install a VNC Client**:
+   - For Android: Install **AVNC** (free, open source) from Google Play Store
+   - For iOS/Android: Install **RealVNC Viewer** or **RVNC Viewer** from App Store/Play Store
+
+2. **Configure Connection**:
+   - Open your VNC client
+   - Add a new connection
+   - Enter your server's **public IP address** as the Host
+   - Enter **5900** as the Port
+   - Enter **ubuntu** as the Password (change this later for security!)
+   - Save the connection
+
+3. **Connect**:
+   - Tap the connection to connect
+   - You should see the Ubuntu LXDE desktop!
+   - You can pinch to zoom, pan around, and use your touchscreen as a mouse!
 
 #### Option B: With a Browser (Mobile/Desktop)
 1. Open your browser and go to: `http://localhost:6900/vnc.html`
