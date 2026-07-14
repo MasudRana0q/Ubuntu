@@ -23,7 +23,7 @@ cd Ubuntu
 
 ### Step 2: Make Scripts Executable
 ```bash
-chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh tunnel-start.sh scripts/docker-common.sh scripts/start-vnc.sh
+chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh web-tunnel.sh scripts/docker-common.sh scripts/start-vnc.sh
 ```
 
 ### Step 3: Start the Container
@@ -33,8 +33,8 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh tunnel-start.sh sc
 
 ### Step 4: Connect!
 
-#### Option A: With a Mobile VNC Client (Recommended for Mobile)
-**Using Serveo in Google Cloud Shell (FREE, no card required!)**:
+#### Option A: With a Mobile Browser (Recommended for Mobile)
+**Using ngrok in Google Cloud Shell (FREE, no card required!)**:
 
 1. **Start the Container**:
    - First, make sure your Ubuntu container is running:
@@ -42,33 +42,26 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh tunnel-start.sh sc
      ./start.sh
      ```
 
-2. **Start Serveo Tunnel**:
-   - Run the tunnel start script:
+2. **Start ngrok Web Tunnel**:
+   - Run the web tunnel start script:
      ```bash
-     ./tunnel-start.sh
+     ./web-tunnel.sh
      ```
    - You'll see something like this:
      ```
-     Forwarding TCP connections from serveo.net:12345 -> localhost:5900
+     Forwarding  https://abc123.ngrok-free.dev -> http://localhost:6900
      ```
-   - Copy the port number (like `12345`)
+   - Copy the Forwarding URL (like `https://abc123.ngrok-free.dev`)
 
-3. **Install a VNC Client on Your Phone**:
-   - For Android: Install **AVNC** (free, open source) or **RealVNC Viewer** from Google Play Store
-   - For iOS: Install **RealVNC Viewer** from App Store
+3. **Open on Your Mobile Browser**:
+   - Open your mobile browser and go to the URL you copied, **and add /vnc.html at the end**!
+   - For example: `https://abc123.ngrok-free.dev/vnc.html`
+   - Enter password: `ubuntu`
+   - Click "Connect"!
 
-4. **Configure Connection**:
-   - Open your VNC client
-   - Add a new connection
-   - Host: `serveo.net`
-   - Port: Use the port number you copied (like `12345`)
-   - Password: `ubuntu` (change this later for security!)
-   - Save the connection
-
-5. **Connect**:
-   - Tap the connection to connect
+4. **Use Your Ubuntu Desktop**:
    - You should see the Ubuntu LXDE desktop!
-   - You can pinch to zoom, pan around, and use your touchscreen as a mouse!
+   - You can pinch to zoom, pan around, and use your touchscreen!
 
 #### Option B: With a Browser (Mobile/Desktop)
 1. Open your browser and go to: `http://localhost:6900/vnc.html`

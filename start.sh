@@ -26,8 +26,8 @@ if [ $? -eq 0 ]; then
     echo -e "   1. With a VNC client (local): Host = localhost, Port = 5900, Password = ubuntu"
     echo -e "   2. With a browser (mobile/desktop): http://localhost:6900/vnc.html"
     echo -e "   3. On Google Cloud Shell: Use Web Preview on port 6900"
-    echo -e "   4. For mobile access (FREE, no card needed): Run ./tunnel-start.sh!"
-    echo -e "   💡 Tip: On mobile, use AVNC or RealVNC Viewer for best experience!"
+    echo -e "   4. For mobile access from anywhere (FREE): Run ./web-tunnel.sh, then open the URL + /vnc.html!"
+    echo -e "   💡 Tip: On mobile, just open the ngrok URL in your browser!"
 else
     echo -e "\n❌ Failed to start container!"
     exit 1
