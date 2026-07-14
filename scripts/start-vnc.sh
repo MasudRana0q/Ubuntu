@@ -5,9 +5,9 @@ chown -R ubuntu:ubuntu /home/ubuntu/.vnc
 
 if [ ! -f /home/ubuntu/.vnc/passwd ]; then
     echo "${VNC_PASSWORD}" | vncpasswd -f > /home/ubuntu/.vnc/passwd
-    chmod 600 /home/ubuntu/.vnc/passwd
-    chown ubuntu:ubuntu /home/ubuntu/.vnc/passwd
 fi
+chmod 600 /home/ubuntu/.vnc/passwd
+chown ubuntu:ubuntu /home/ubuntu/.vnc/passwd
 
 # Always rewrite xstartup so the desktop session uses the latest known-good command.
 cat > /home/ubuntu/.vnc/xstartup << 'EOF'
@@ -32,6 +32,7 @@ rm -f /home/ubuntu/.vnc/*.pid
 
 exec vncserver -fg :1 \
     -rfbport ${VNC_PORT} \
+    -rfbauth /home/ubuntu/.vnc/passwd \
     -geometry ${VNC_RESOLUTION} \
     -depth ${VNC_DEPTH} \
     -localhost no \
