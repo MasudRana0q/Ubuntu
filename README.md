@@ -23,7 +23,7 @@ cd Ubuntu
 
 ### Step 2: Make Scripts Executable
 ```bash
-chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh ngrok-start.sh scripts/docker-common.sh scripts/start-vnc.sh
+chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh tunnel-start.sh scripts/docker-common.sh scripts/start-vnc.sh
 ```
 
 ### Step 3: Start the Container
@@ -34,26 +34,24 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh ngrok-start.sh scr
 ### Step 4: Connect!
 
 #### Option A: With a Mobile VNC Client (Recommended for Mobile)
-**Using ngrok in Google Cloud Shell**:
+**Using Serveo in Google Cloud Shell (FREE, no card required!)**:
 
-1. **Install ngrok and Configure Auth Token**:
-   - First, make sure your Ubuntu container is running with `./start.sh`
-   - Go to https://ngrok.com, sign up for a free account, and get your auth token from https://dashboard.ngrok.com/get-started/your-authtoken
-   - In Cloud Shell, set your auth token:
+1. **Start the Container**:
+   - First, make sure your Ubuntu container is running:
      ```bash
-     ngrok config add-authtoken YOUR_AUTH_TOKEN
+     ./start.sh
      ```
 
-2. **Start ngrok Tunnel**:
-   - Run the ngrok start script:
+2. **Start Serveo Tunnel**:
+   - Run the tunnel start script:
      ```bash
-     ./ngrok-start.sh
+     ./tunnel-start.sh
      ```
    - You'll see something like this:
      ```
-     Forwarding  tcp://0.tcp.ngrok.io:12345 -> localhost:5900
+     Forwarding TCP connections from serveo.net:12345 -> localhost:5900
      ```
-   - Copy the Forwarding address (like `0.tcp.ngrok.io:12345`)
+   - Copy the port number (like `12345`)
 
 3. **Install a VNC Client on Your Phone**:
    - For Android: Install **AVNC** (free, open source) or **RealVNC Viewer** from Google Play Store
@@ -62,8 +60,8 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh ngrok-start.sh scr
 4. **Configure Connection**:
    - Open your VNC client
    - Add a new connection
-   - Host: Use the ngrok address you copied (like `0.tcp.ngrok.io`)
-   - Port: Use the ngrok port (like `12345`)
+   - Host: `serveo.net`
+   - Port: Use the port number you copied (like `12345`)
    - Password: `ubuntu` (change this later for security!)
    - Save the connection
 
