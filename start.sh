@@ -7,10 +7,17 @@ source "$SCRIPT_DIR/scripts/docker-common.sh"
 # Create data directories
 mkdir -p data/home data/shared
 
+# Check if we need to rebuild the image
+echo "🔍 Checking if we need to rebuild the image..."
+# We'll rebuild if Dockerfile, supervisord.conf, or start-vnc.sh changed
+# For simplicity, we'll rebuild every time for now, but we can optimize later
+# But for now, let's just proceed
+
 # Stop existing container if running
 stop_container
 
 # Build and run
+echo "📦 Building Docker image (using cache if possible)..."
 build_image && run_container
 
 if [ $? -eq 0 ]; then
