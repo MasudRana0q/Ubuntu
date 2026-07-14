@@ -1,169 +1,234 @@
-# Ubuntu Desktop with KasmVNC for Google Cloud Shell
+# Ubuntu Desktop with KasmVNC
 
-A production-quality Docker project that runs Ubuntu Desktop (XFCE) with KasmVNC, optimized for Google Cloud Shell and mobile devices.
+Production-ready Docker project for running an Ubuntu XFCE desktop with KasmVNC. The repository is designed to work locally and in Google Cloud Shell, with Cloud Shell-compatible helper scripts that use plain Docker instead of the legacy `docker-compose` client.
 
 ## Features
 
-- 🖥️ Ubuntu 24.04 with XFCE Desktop Environment
-- 🔒 KasmVNC for secure remote access
-- 📱 Mobile-optimized interface
-- 📂 Shared folder support
-- 💾 Persistent data storage
-- 👤 Password authentication
-- 🩺 Health check
-- 🔄 Auto restart
-- 📊 Logging
+- Ubuntu 24.04 base image
+- XFCE desktop environment
+- KasmVNC browser-based desktop access
+- Firefox, Thunar, and XFCE Terminal
+- Persistent home and shared folders
+- Password-based login
+- Health check script
+- Auto-restart container policy
+- Google Cloud Shell-friendly startup flow
+- Mobile browser support
 
 ## Requirements
 
-- Docker
-- Docker Compose
+### Local machine
 
-## Quick Start
+- Docker Engine 24+ recommended
+- Docker Compose v2 optional
+- 4 GB RAM recommended
+- 10 GB free disk space recommended
 
-### 1. Clone the Repository
+### Google Cloud Shell
+
+- Cloud Shell with Docker support enabled
+- Enough temporary disk space for image build layers
+- Browser access through Cloud Shell Web Preview
+
+## Clone
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/MasudRana0q/Ubuntu.git
 cd Ubuntu
-```
-
-### 2. Make Scripts Executable
-
-```bash
 chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh
 ```
 
-### 3. Start the Container
+## Installation
+
+No extra host installation is required beyond Docker. The first run builds the image automatically.
+
+## Build
+
+### Recommended
 
 ```bash
 ./start.sh
 ```
 
-### 4. Access the Desktop
-
-Open your browser and navigate to:
-`http://localhost:6901`
-
-Default password: `ubuntu`
-
-## Google Cloud Shell Setup
-
-### Step 1: Open Google Cloud Shell
-
-Go to [Google Cloud Console](https://console.cloud.google.com/) and open Cloud Shell.
-
-### Step 2: Clone the Repository
+### Manual local build
 
 ```bash
-git clone <your-repository-url>
-cd Ubuntu
+docker build -t ubuntu-desktop-kasm:latest .
 ```
 
-### Step 3: Make Scripts Executable
+## Run
 
-```bash
-chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh
-```
-
-### Step 4: Start the Container
+### Local machine
 
 ```bash
 ./start.sh
 ```
 
-### Step 5: Access via Web Preview
+Open `http://localhost:6901` in your browser.
 
-Click on "Web Preview" in Cloud Shell and select "Preview on port 6901".
+### Google Cloud Shell
 
-### Google Cloud Shell Limitations
+Use a writable directory such as `/tmp`:
 
-1. **Session Timeout**: Cloud Shell sessions timeout after 1 hour of inactivity.
-2. **Storage**: Persistent storage is limited to 5 GB.
-3. **Resource Limits**: CPU and memory are limited.
+```bash
+cd /tmp
+git clone https://github.com/MasudRana0q/Ubuntu.git
+cd Ubuntu
+chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh
+./start.sh
+```
 
-**Alternative**: For long-term use, deploy on Google Compute Engine or another VPS.
+Then open Cloud Shell `Web Preview` for port `6901`.
 
-## Mobile Access
+## Stop
 
-### Via Browser
+```bash
+./stop.sh
+```
 
-1. Open your mobile browser.
-2. Navigate to the access URL (Cloud Shell Web Preview or your server URL).
-3. Enter the password.
+## Restart
 
-### Via VNC Client
+```bash
+./restart.sh
+```
 
-1. Install a VNC client like AVNC, bVNC, or RealVNC Viewer on your mobile device.
-2. Configure the connection:
-   - Host: Your server address
-   - Port: 6901
-   - Password: Your VNC password
-3. Connect!
+## Update
+
+```bash
+./update.sh
+```
 
 ## Configuration
 
-### Environment Variables
+The helper scripts read these environment variables:
 
-Edit `docker-compose.yml` to customize:
+- `VNC_PORT`: host port for browser access, default `6901`
+- `VNC_PASSWORD`: desktop login password, default `ubuntu`
+- `VNC_RESOLUTION`: desktop resolution, default `1280x720`
+- `IMAGE_NAME`: Docker image name, default `ubuntu-desktop-kasm`
+- `CONTAINER_NAME`: container name, default `ubuntu-desktop`
+- `DATA_HOME`: persistent home folder path, default `./data/home`
+- `DATA_SHARED`: shared folder path, default `./data/shared`
 
-- `VNC_PORT`: VNC server port (default: 6901)
-- `VNC_PASSWORD`: VNC password (default: ubuntu)
-- `VNC_RESOLUTION`: Screen resolution (default: 1280x720)
+Example:
 
-### Persistent Storage
+```bash
+export VNC_PASSWORD='StrongPassword123'
+export VNC_RESOLUTION='1600x900'
+./start.sh
+```
 
-- `data/home/`: User home directory
-- `data/shared/`: Shared folder
+## Storage
 
-## Scripts
+- `data/home`: persistent Linux home directory inside the container
+- `data/shared`: shared folder mounted to `/shared`
+- `.runtime/docker-config`: temporary Docker client config used by the scripts to avoid Cloud Shell permission issues
 
-- `start.sh`: Start the container
-- `stop.sh`: Stop the container
-- `restart.sh`: Restart the container
-- `update.sh`: Update the project and restart
-- `healthcheck.sh`: Check container health
+## Mobile Support
+
+### Google Cloud Shell
+
+- Supported method: browser only
+- Recommended flow: open Cloud Shell Web Preview for port `6901`
+- Reason: Cloud Shell exposes browser preview URLs, not a raw public TCP port for VNC clients
+- Result: apps like AVNC, bVNC, and RealVNC Viewer are not the right choice for Cloud Shell
+
+### Google Compute Engine or VPS
+
+- Supported methods: browser and raw VNC client
+- Browser URL: `http://SERVER_IP:6901`
+- VNC host: `SERVER_IP`
+- VNC port: `6901`
+- Password source: `VNC_PASSWORD`
+- Security recommendation: place the service behind HTTPS reverse proxy, VPN, or firewall allow-list
+
+## Google Cloud Shell Limitations
+
+- Session lifecycle: Cloud Shell sessions are temporary and can stop unexpectedly
+- Disk space: storage is limited, so large image rebuilds may fail
+- Old compose client: Cloud Shell may include a legacy `docker-compose` binary that cannot talk to the current Docker daemon
+- Port exposure: Web Preview works for browser access, but direct mobile VNC clients cannot connect through Cloud Shell
+- Background usage: this is not suitable for always-on desktop hosting
+
+## Recommended Production Alternative
+
+For reliable long-term use, run this repository on Google Compute Engine, an Ubuntu VPS, or any VM where you control:
+
+- Docker version
+- firewall rules
+- public IP
+- persistent disks
+- TLS and reverse proxy
 
 ## Troubleshooting
 
-### Container won't start
+### Start script fails with Docker config permission denied
+
+The bundled scripts already redirect Docker client config into `.runtime/docker-config`. Re-clone or pull the latest version and run `./start.sh` again.
+
+### Start script fails with old Docker Compose API version
+
+Use the latest scripts from this repository. They no longer require `docker-compose` for the normal run path.
+
+### Container exists but desktop is unavailable
 
 ```bash
 ./healthcheck.sh
-docker compose logs
+docker logs --tail 100 ubuntu-desktop
 ```
 
-### Can't access the desktop
+### KasmVNC page opens but login fails
 
-- Check if port 6901 is open
-- Verify the container is running: `docker compose ps`
+- verify `VNC_PASSWORD`
+- remove old persistent state from `data/home/.vnc` if needed
+- restart with `./restart.sh`
 
-### Forgot password
+### Build fails in Cloud Shell
 
-1. Stop the container: `./stop.sh`
-2. Edit `docker-compose.yml` to change `VNC_PASSWORD`
-3. Start again: `./start.sh`
+Possible causes:
+
+- not enough disk space
+- Cloud Shell Docker service unavailable
+- upstream package mirror temporary failure
+
+Practical fallback:
+
+- rebuild later in a fresh session
+- run the same project on Google Compute Engine or another VPS
+
+## FAQ
+
+### Can I use RealVNC Viewer or AVNC in Google Cloud Shell?
+
+No. In Cloud Shell you should use browser access through Web Preview.
+
+### Can I use RealVNC Viewer or AVNC on a VPS?
+
+Yes. Expose TCP port `6901`, secure it properly, and connect with the same password configured by `VNC_PASSWORD`.
+
+### Does `docker-compose.yml` still matter?
+
+Yes. It remains available for local environments with modern Compose support, but the helper scripts intentionally use direct Docker commands for maximum Cloud Shell compatibility.
 
 ## Security Notes
 
-- **Change the default password** immediately!
-- Do not expose port 6901 to the public internet without proper security (VPN, IP whitelisting, etc.).
-- Use HTTPS if possible.
+- Change the default password before exposing the service anywhere
+- Do not publish port `6901` directly to the public internet without firewall controls
+- Prefer HTTPS reverse proxy for browser access on VPS deployments
+- Treat the desktop as an internet-facing service if exposed publicly
 
-## Backup & Restore
-
-### Backup
+## Backup
 
 ```bash
-tar -czvf backup.tar.gz data/
+tar -czvf ubuntu-desktop-backup.tar.gz data
 ```
 
-### Restore
+## Restore
 
 ```bash
-tar -xzvf backup.tar.gz
+tar -xzvf ubuntu-desktop-backup.tar.gz
 ```
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See `LICENSE`.

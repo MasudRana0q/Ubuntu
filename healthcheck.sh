@@ -1,21 +1,24 @@
 #!/bin/bash
 
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "${SCRIPT_DIR}/scripts/docker-common.sh"
+
 echo "🔍 Checking container health..."
 
-if command -v docker-compose &> /dev/null; then
-    docker-compose ps
-    docker-compose logs --tail=20
-    docker-compose exec ubuntu-desktop curl -f http://localhost:6901/ 2>/dev/null
-elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
-    docker compose ps
-    docker compose logs --tail=20
-    docker compose exec ubuntu-desktop curl -f http://localhost:6901/ 2>/dev/null
-else
-    echo "❌ Docker Compose not found!"
+setup_docker_env
+require_docker
+
+if ! container_exists; then
+    echo "❌ Container ${CONTAINER_NAME} does not exist."
     exit 1
 fi
 
-if [ $? -eq 0 ]; then
+docker ps -a --filter "name=^/${CONTAINER_NAME}$"
+docker logs --tail 20 "${CONTAINER_NAME}"
+
+if container_running && docker exec "${CONTAINER_NAME}" curl -fsS "http://localhost:6901/" >/dev/null 2>&1; then
     echo "✅ Container is healthy!"
 else
     echo "❌ Container is unhealthy!"

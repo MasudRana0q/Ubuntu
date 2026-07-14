@@ -1,19 +1,18 @@
 #!/bin/bash
 
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "${SCRIPT_DIR}/scripts/docker-common.sh"
+
 echo "🛑 Stopping Ubuntu Desktop..."
 
-if command -v docker-compose &> /dev/null; then
-    docker-compose down
-elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
-    docker compose down
-else
-    echo "❌ Docker Compose not found!"
-    exit 1
-fi
+setup_docker_env
+require_docker
 
-if [ $? -eq 0 ]; then
+if container_exists; then
+    docker rm -f "${CONTAINER_NAME}"
     echo "✅ Container stopped successfully!"
 else
-    echo "❌ Failed to stop container!"
-    exit 1
+    echo "ℹ️ Container ${CONTAINER_NAME} is not running."
 fi

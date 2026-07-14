@@ -1,19 +1,12 @@
 #!/bin/bash
 
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "🔄 Restarting Ubuntu Desktop..."
 
-if command -v docker-compose &> /dev/null; then
-    docker-compose restart
-elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
-    docker compose restart
-else
-    echo "❌ Docker Compose not found!"
-    exit 1
-fi
+"${SCRIPT_DIR}/stop.sh"
+"${SCRIPT_DIR}/start.sh"
 
-if [ $? -eq 0 ]; then
-    echo "✅ Container restarted successfully!"
-else
-    echo "❌ Failed to restart container!"
-    exit 1
-fi
+echo "✅ Container restarted successfully!"

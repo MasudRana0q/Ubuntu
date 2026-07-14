@@ -1,23 +1,15 @@
 #!/bin/bash
 
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "🔄 Updating Ubuntu Desktop..."
 
-git pull origin main
+git fetch origin
+git pull --ff-only origin main
 
-if command -v docker-compose &> /dev/null; then
-    docker-compose down
-    docker-compose up -d --build
-elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
-    docker compose down
-    docker compose up -d --build
-else
-    echo "❌ Docker Compose not found!"
-    exit 1
-fi
+"${SCRIPT_DIR}/stop.sh"
+"${SCRIPT_DIR}/start.sh"
 
-if [ $? -eq 0 ]; then
-    echo "✅ Container updated and restarted successfully!"
-else
-    echo "❌ Failed to update container!"
-    exit 1
-fi
+echo "✅ Container updated and restarted successfully!"

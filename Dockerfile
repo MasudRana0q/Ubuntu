@@ -1,7 +1,8 @@
 FROM ubuntu:24.04
 
-LABEL maintainer="Your Name <your@email.com>"
-LABEL description="Ubuntu Desktop with KasmVNC for Google Cloud Shell"
+LABEL org.opencontainers.image.title="Ubuntu Desktop with KasmVNC"
+LABEL org.opencontainers.image.description="Ubuntu XFCE desktop with KasmVNC, optimized for browser access and Google Cloud Shell compatible scripts"
+LABEL org.opencontainers.image.source="https://github.com/MasudRana0q/Ubuntu"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
