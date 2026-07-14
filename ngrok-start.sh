@@ -26,18 +26,21 @@ if ! command -v ngrok &> /dev/null; then
 fi
 
 # Check if ngrok auth token is configured
-if [ -z "$NGROK_AUTHTOKEN" ] && [ ! -f ~/.ngrok2/ngrok.yml ]; then
+if [ -z "$NGROK_AUTHTOKEN" ] && [ ! -f ~/.ngrok2/ngrok.yml ] && [ ! -f ~/.config/ngrok/ngrok.yml ]; then
     echo ""
     echo "⚠️  ngrok auth token not found!"
     echo "📝 Please get your auth token from https://dashboard.ngrok.com/get-started/your-authtoken"
     echo ""
-    echo "Then set it with:"
-    echo "  ngrok config add-authtoken YOUR_TOKEN"
-    echo ""
-    echo "Or set the NGROK_AUTHTOKEN environment variable before running this script"
+    echo "Then set it as environment variable:"
+    echo "  export NGROK_AUTHTOKEN=YOUR_TOKEN"
+    echo "  ./ngrok-start.sh"
     echo ""
     exit 1
 fi
+
+# Set ngrok config directory to /tmp to avoid permission issues in Cloud Shell
+export NGROK_CONFIG_DIR="/tmp/.ngrok"
+mkdir -p "$NGROK_CONFIG_DIR"
 
 # Start ngrok tunnel for port 5900
 echo ""
@@ -45,4 +48,8 @@ echo "🚀 Starting ngrok tunnel..."
 echo "💡 Your VNC connection details will appear below!"
 echo ""
 
-ngrok tcp 5900
+if [ -n "$NGROK_AUTHTOKEN" ]; then
+    ngrok tcp 5900 --authtoken "$NGROK_AUTHTOKEN"
+else
+    ngrok tcp 5900
+fi
