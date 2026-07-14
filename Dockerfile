@@ -6,6 +6,7 @@ LABEL org.opencontainers.image.source="https://github.com/MasudRana0q/Ubuntu"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install dependencies first to take advantage of build cache
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -26,35 +27,36 @@ RUN apt-get update && apt-get install -y \
     websockify \
     && rm -rf /var/lib/apt/lists/*
 
+# Create user
 RUN useradd -m -s /bin/bash ubuntu \
     && echo "ubuntu:ubuntu" | chpasswd \
     && adduser ubuntu sudo
 
+# Create directories
 RUN mkdir -p /home/ubuntu/.vnc \
-    && chown -R ubuntu:ubuntu /home/ubuntu/.vnc
+    /home/ubuntu/Desktop \
+    /shared \
+    && chown -R ubuntu:ubuntu /home/ubuntu /shared
 
-RUN mkdir -p /home/ubuntu/Desktop \
-    && chown -R ubuntu:ubuntu /home/ubuntu/Desktop
-
-RUN mkdir -p /shared \
-    && chown -R ubuntu:ubuntu /shared
-
+# Copy config and scripts
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY scripts/start-vnc.sh /usr/local/bin/start-vnc.sh
 RUN chmod +x /usr/local/bin/start-vnc.sh
 
+# Environment variables
 ENV VNC_PORT=5900
 ENV NO_VNC_PORT=6900
 ENV VNC_PASSWORD=ubuntu
 ENV VNC_RESOLUTION=1024x768
 ENV VNC_DEPTH=24
 
-EXPOSE 5900
-EXPOSE 6900
-
+# Ports and volumes
+EXPOSE 5900 6900
 VOLUME ["/home/ubuntu", "/shared"]
 
+# Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD pgrep Xtigervnc || exit 1
 
+# Command
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
