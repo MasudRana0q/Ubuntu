@@ -9,21 +9,22 @@ if [ ! -f /home/ubuntu/.vnc/passwd ]; then
     chown ubuntu:ubuntu /home/ubuntu/.vnc/passwd
 fi
 
-if [ ! -f /home/ubuntu/.vnc/xstartup ]; then
-    cat > /home/ubuntu/.vnc/xstartup << 'EOF'
+# Always rewrite xstartup so the desktop session uses the latest known-good command.
+cat > /home/ubuntu/.vnc/xstartup << 'EOF'
 #!/bin/bash
-startlxde &
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+exec dbus-launch --exit-with-session startlxde
 EOF
-    chmod +x /home/ubuntu/.vnc/xstartup
-    chown ubuntu:ubuntu /home/ubuntu/.vnc/xstartup
-fi
+chmod +x /home/ubuntu/.vnc/xstartup
+chown ubuntu:ubuntu /home/ubuntu/.vnc/xstartup
 
 chown -R ubuntu:ubuntu /home/ubuntu/.vnc
 
 export USER=ubuntu
 export HOME=/home/ubuntu
 
-# Clean up old lock files
+# Clean up old VNC display locks before starting a fresh server.
 rm -f /tmp/.X1-lock
 rm -f /tmp/.X11-unix/X1
 rm -f /home/ubuntu/.vnc/*.log
