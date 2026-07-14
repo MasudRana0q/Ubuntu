@@ -30,7 +30,7 @@ rm -f /tmp/.X11-unix/X1
 rm -f /home/ubuntu/.vnc/*.log
 rm -f /home/ubuntu/.vnc/*.pid
 
-exec vncserver :1 \
+exec vncserver -fg :1 \
     -rfbport ${VNC_PORT} \
     -geometry ${VNC_RESOLUTION} \
     -depth ${VNC_DEPTH} \
