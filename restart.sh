@@ -2,7 +2,14 @@
 
 echo "🔄 Restarting Ubuntu Desktop..."
 
-docker compose restart
+if command -v docker-compose &> /dev/null; then
+    docker-compose restart
+elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
+    docker compose restart
+else
+    echo "❌ Docker Compose not found!"
+    exit 1
+fi
 
 if [ $? -eq 0 ]; then
     echo "✅ Container restarted successfully!"
