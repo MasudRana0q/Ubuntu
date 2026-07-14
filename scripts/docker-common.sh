@@ -20,6 +20,7 @@ run_container() {
         --name "$CONTAINER_NAME" \
         --restart unless-stopped \
         -p 5900:5900 \
+        -p 6900:6900 \
         -v "$(pwd)/data/home:/home/ubuntu" \
         -v "$(pwd)/data/shared:/shared" \
         "$IMAGE_NAME:latest"
@@ -39,5 +40,6 @@ restart_container() {
 check_health() {
     echo "🔍 Checking container: $CONTAINER_NAME"
     docker ps -a --filter "name=^/$CONTAINER_NAME$"
+    echo -e "\n📜 Logs (last 20 lines):"
     docker logs --tail 20 "$CONTAINER_NAME" 2>/dev/null || true
 }

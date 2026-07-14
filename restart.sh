@@ -1,12 +1,13 @@
 #!/bin/bash
 
-set -e
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/scripts/docker-common.sh"
 
-echo "🔄 Restarting Ubuntu Desktop..."
+restart_container
 
-"${SCRIPT_DIR}/stop.sh"
-"${SCRIPT_DIR}/start.sh"
-
-echo "✅ Container restarted successfully!"
+if [ $? -eq 0 ]; then
+    echo "✅ Container restarted successfully!"
+else
+    echo "❌ Failed to restart container!"
+    exit 1
+fi

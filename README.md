@@ -1,11 +1,12 @@
-# Ubuntu Desktop for Mobile (VNC + Browser)
+# Ubuntu Desktop for Mobile (VNC + noVNC Browser)
 
-Production-ready Docker project for Ubuntu Desktop (LXDE) with TigerVNC, optimized for **mobile VNC clients** (AVNC, RealVNC Viewer, RVNC) and Google Cloud Shell!
+Production-ready Docker project for Ubuntu Desktop (LXDE) with TigerVNC and noVNC, optimized for **mobile VNC clients** (AVNC, RealVNC Viewer, RVNC) and Google Cloud Shell!
 
 ## Features
-- 📱 **Optimized for Mobile**: Works great with VNC clients
+- 📱 **Optimized for Mobile**: Works great with VNC clients and browser
 - 🖥️ Ubuntu 22.04 (compatible with older Docker versions)
 - 🔒 TigerVNC (secure, widely supported)
+- 🌐 noVNC (browser access)
 - 📂 Shared folder + persistent storage
 - 📄 Clean, simple scripts
 
@@ -40,13 +41,19 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh scripts/docker-com
    - Password: `ubuntu`
 3. Connect!
 
-#### Option B: With Google Cloud Shell
+#### Option B: With a Browser (Mobile/Desktop)
+1. Open your browser and go to: `http://localhost:6900/vnc.html`
+2. Enter password: `ubuntu`
+3. Click "Connect"!
+
+#### Option C: With Google Cloud Shell
 1. Click "Web Preview" in Cloud Shell
-2. Select "Preview on port 5900"
+2. Select "Preview on port 6900"
 
 ## Configuration
 You can change settings by editing `start.sh` (the `docker run` command) or by modifying the environment variables in `Dockerfile`:
 - `VNC_PORT`: VNC server port (default: 5900)
+- `NO_VNC_PORT`: noVNC browser port (default: 6900)
 - `VNC_PASSWORD`: VNC password (default: ubuntu)
 - `VNC_RESOLUTION`: Screen resolution (default: 1024x768)
 - `VNC_DEPTH`: Color depth (default: 24)
@@ -64,7 +71,7 @@ You can change settings by editing `start.sh` (the `docker run` command) or by m
 - **Small screen on mobile**: Adjust `VNC_RESOLUTION` to something like `1080x1920` (portrait) or `1920x1080` (landscape) in `Dockerfile`, then rebuild with `./start.sh`
 
 ## Security Notes
-Always change the default password! Do not expose port 5900 to the public internet without a VPN or IP whitelist!
+Always change the default password! Do not expose ports 5900/6900 to the public internet without a VPN or IP whitelist!
 
 ## Backup & Restore
 ```bash

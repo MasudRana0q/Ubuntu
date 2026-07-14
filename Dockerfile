@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
-LABEL org.opencontainers.image.title="Ubuntu Desktop for Mobile (VNC + Browser)"
-LABEL org.opencontainers.image.description="Ubuntu LXDE desktop with TigerVNC, optimized for mobile VNC clients and browser access"
+LABEL org.opencontainers.image.title="Ubuntu Desktop for Mobile (VNC + noVNC Browser)"
+LABEL org.opencontainers.image.description="Ubuntu LXDE desktop with TigerVNC and noVNC, optimized for mobile VNC clients and browser access"
 LABEL org.opencontainers.image.source="https://github.com/MasudRana0q/Ubuntu"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -22,6 +22,8 @@ RUN apt-get update && apt-get install -y \
     lxde \
     lxde-common \
     firefox \
+    novnc \
+    websockify \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash ubuntu \
@@ -42,11 +44,13 @@ COPY scripts/start-vnc.sh /usr/local/bin/start-vnc.sh
 RUN chmod +x /usr/local/bin/start-vnc.sh
 
 ENV VNC_PORT=5900
+ENV NO_VNC_PORT=6900
 ENV VNC_PASSWORD=ubuntu
 ENV VNC_RESOLUTION=1024x768
 ENV VNC_DEPTH=24
 
 EXPOSE 5900
+EXPOSE 6900
 
 VOLUME ["/home/ubuntu", "/shared"]
 

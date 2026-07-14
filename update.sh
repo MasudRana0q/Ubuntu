@@ -1,15 +1,18 @@
 #!/bin/bash
 
-set -e
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/scripts/docker-common.sh"
 
-echo "🔄 Updating Ubuntu Desktop..."
-
+echo "🔄 Updating project..."
 git fetch origin
-git pull --ff-only origin main
+git reset --hard origin/main
 
-"${SCRIPT_DIR}/stop.sh"
-"${SCRIPT_DIR}/start.sh"
+stop_container
+build_image && run_container
 
-echo "✅ Container updated and restarted successfully!"
+if [ $? -eq 0 ]; then
+    echo "✅ Container updated and restarted successfully!"
+else
+    echo "❌ Failed to update container!"
+    exit 1
+fi
