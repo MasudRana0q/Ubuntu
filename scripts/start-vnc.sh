@@ -24,9 +24,17 @@ chown -R ubuntu:ubuntu /home/ubuntu/.vnc
 export USER=ubuntu
 export HOME=/home/ubuntu
 
-exec vncserver :1 \
+# Clean up old lock files
+rm -f /tmp/.X1-lock
+rm -f /tmp/.X11-unix/X1
+rm -f /home/ubuntu/.vnc/*.log
+rm -f /home/ubuntu/.vnc/*.pid
+
+exec Xtigervnc :1 \
     -rfbport ${VNC_PORT} \
     -geometry ${VNC_RESOLUTION} \
     -depth ${VNC_DEPTH} \
     -localhost no \
-    -SecurityTypes VncAuth
+    -SecurityTypes VncAuth \
+    -PasswordFile /home/ubuntu/.vnc/passwd \
+    -xstartup /home/ubuntu/.vnc/xstartup
