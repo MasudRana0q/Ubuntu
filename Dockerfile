@@ -25,6 +25,12 @@ RUN apt-get update && apt-get install -y \
     firefox \
     novnc \
     websockify \
+    && install -d -m 0755 /etc/apt/keyrings \
+    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg \
+    && chmod a+r /etc/apt/keyrings/google-chrome.gpg \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
 # Create user
@@ -47,7 +53,7 @@ RUN chmod +x /usr/local/bin/start-vnc.sh
 ENV VNC_PORT=5900
 ENV NO_VNC_PORT=6900
 ENV VNC_PASSWORD=ubuntu
-ENV VNC_RESOLUTION=1024x768
+ENV VNC_RESOLUTION=1080x2340
 ENV VNC_DEPTH=24
 
 # Ports and volumes
