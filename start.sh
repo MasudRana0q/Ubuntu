@@ -1,22 +1,25 @@
 #!/bin/bash
 
-set -e
-
+# Load common helper functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-. "${SCRIPT_DIR}/scripts/docker-common.sh"
+source "$SCRIPT_DIR/scripts/docker-common.sh"
 
-echo "🚀 Starting Ubuntu Desktop with KasmVNC..."
+# Create data directories
+mkdir -p data/home data/shared
 
-setup_docker_env
-require_docker
+# Stop existing container if running
+stop_container
 
-echo "📦 Building image ${IMAGE_NAME}:latest ..."
-build_image
+# Build and run
+build_image && run_container
 
-echo "▶️ Starting container ${CONTAINER_NAME} ..."
-run_container
-
-echo "✅ Container started successfully!"
-echo "🌐 Browser URL: http://localhost:${VNC_PORT}"
-echo "🔐 Password: ${VNC_PASSWORD}"
-echo "📁 Shared folder: ${DATA_SHARED}"
+if [ $? -eq 0 ]; then
+    echo -e "\n✅ Container started successfully!"
+    echo -e "📝 How to connect:"
+    echo -e "   1. With a VNC client (mobile/desktop): Host = localhost, Port = 5900, Password = ubuntu"
+    echo -e "   2. On Google Cloud Shell: Use Web Preview on port 5900"
+    echo -e "   💡 Tip: On mobile, use AVNC or RealVNC Viewer for best experience!"
+else
+    echo -e "\n❌ Failed to start container!"
+    exit 1
+fi

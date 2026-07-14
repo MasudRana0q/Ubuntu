@@ -1,7 +1,7 @@
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
-LABEL org.opencontainers.image.title="Ubuntu Desktop with KasmVNC"
-LABEL org.opencontainers.image.description="Ubuntu XFCE desktop with KasmVNC, optimized for browser access and Google Cloud Shell compatible scripts"
+LABEL org.opencontainers.image.title="Ubuntu Desktop for Mobile (VNC + Browser)"
+LABEL org.opencontainers.image.description="Ubuntu LXDE desktop with TigerVNC, optimized for mobile VNC clients and browser access"
 LABEL org.opencontainers.image.source="https://github.com/MasudRana0q/Ubuntu"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -17,20 +17,11 @@ RUN apt-get update && apt-get install -y \
     dbus-x11 \
     x11-apps \
     x11-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y \
-    xfce4 \
-    xfce4-goodies \
-    xfce4-terminal \
-    thunar \
+    tigervnc-standalone-server \
+    tigervnc-xorg-extension \
+    lxde \
+    lxde-common \
     firefox \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN wget -q https://github.com/kasmtech/KasmVNC/releases/download/v1.4.1/kasmvncserver_1.4.1_ubuntu24.04_amd64.deb -O /tmp/kasmvncserver.deb \
-    && apt-get update \
-    && apt-get install -y /tmp/kasmvncserver.deb \
-    && rm -rf /tmp/kasmvncserver.deb \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash ubuntu \
@@ -50,15 +41,16 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY scripts/start-vnc.sh /usr/local/bin/start-vnc.sh
 RUN chmod +x /usr/local/bin/start-vnc.sh
 
-ENV VNC_PORT=6901
+ENV VNC_PORT=5900
 ENV VNC_PASSWORD=ubuntu
-ENV VNC_RESOLUTION=1280x720
+ENV VNC_RESOLUTION=1024x768
+ENV VNC_DEPTH=24
 
-EXPOSE 6901
+EXPOSE 5900
 
 VOLUME ["/home/ubuntu", "/shared"]
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:6901/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD pgrep Xtigervnc || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

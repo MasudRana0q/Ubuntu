@@ -1,64 +1,43 @@
 #!/bin/bash
 
-set -u
+# Common Docker helper functions for Ubuntu Desktop project
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RUNTIME_DIR="${PROJECT_ROOT}/.runtime"
-DOCKER_CONFIG_DIR="${DOCKER_CONFIG_DIR:-${RUNTIME_DIR}/docker-config}"
-IMAGE_NAME="${IMAGE_NAME:-ubuntu-desktop-kasm}"
-CONTAINER_NAME="${CONTAINER_NAME:-ubuntu-desktop}"
-VNC_PORT="${VNC_PORT:-6901}"
-VNC_PASSWORD="${VNC_PASSWORD:-ubuntu}"
-VNC_RESOLUTION="${VNC_RESOLUTION:-1280x720}"
-DATA_HOME="${DATA_HOME:-${PROJECT_ROOT}/data/home}"
-DATA_SHARED="${DATA_SHARED:-${PROJECT_ROOT}/data/shared}"
+IMAGE_NAME="ubuntu-desktop-vnc"
+CONTAINER_NAME="ubuntu-desktop-vnc"
 
-ensure_runtime_dirs() {
-    mkdir -p "${RUNTIME_DIR}" "${DOCKER_CONFIG_DIR}" "${DATA_HOME}" "${DATA_SHARED}"
-}
-
-setup_docker_env() {
-    ensure_runtime_dirs
-    export DOCKER_CONFIG="${DOCKER_CONFIG_DIR}"
-}
-
-require_docker() {
-    if ! command -v docker >/dev/null 2>&1; then
-        echo "❌ Docker CLI পাওয়া যায়নি। আগে Docker ইনস্টল করুন।"
-        exit 1
-    fi
-
-    if ! docker info >/dev/null 2>&1; then
-        echo "❌ Docker daemon অ্যাক্সেস করা যাচ্ছে না। Cloud Shell-এ আগে Docker environment চালু আছে কি না দেখুন।"
-        exit 1
-    fi
-}
-
-container_exists() {
-    docker ps -a --format '{{.Names}}' | grep -Fx "${CONTAINER_NAME}" >/dev/null 2>&1
-}
-
-container_running() {
-    docker ps --format '{{.Names}}' | grep -Fx "${CONTAINER_NAME}" >/dev/null 2>&1
-}
+# Set Docker config directory to avoid permission issues in Cloud Shell
+export DOCKER_CONFIG="${TMPDIR:-/tmp}/.docker"
+mkdir -p "$DOCKER_CONFIG"
 
 build_image() {
-    docker build --tag "${IMAGE_NAME}:latest" "${PROJECT_ROOT}"
+    echo "📦 Building Docker image: $IMAGE_NAME:latest"
+    docker build -t "$IMAGE_NAME:latest" .
 }
 
 run_container() {
-    if container_exists; then
-        docker rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || return 1
-    fi
-
+    echo "🚀 Starting container: $CONTAINER_NAME"
     docker run -d \
-        --name "${CONTAINER_NAME}" \
+        --name "$CONTAINER_NAME" \
         --restart unless-stopped \
-        -p "${VNC_PORT}:6901" \
-        -e VNC_PORT=6901 \
-        -e VNC_PASSWORD="${VNC_PASSWORD}" \
-        -e VNC_RESOLUTION="${VNC_RESOLUTION}" \
-        -v "${DATA_HOME}:/home/ubuntu" \
-        -v "${DATA_SHARED}:/shared" \
-        "${IMAGE_NAME}:latest"
+        -p 5900:5900 \
+        -v "$(pwd)/data/home:/home/ubuntu" \
+        -v "$(pwd)/data/shared:/shared" \
+        "$IMAGE_NAME:latest"
+}
+
+stop_container() {
+    echo "🛑 Stopping container: $CONTAINER_NAME"
+    docker stop "$CONTAINER_NAME" 2>/dev/null || true
+    docker rm "$CONTAINER_NAME" 2>/dev/null || true
+}
+
+restart_container() {
+    echo "🔄 Restarting container: $CONTAINER_NAME"
+    docker restart "$CONTAINER_NAME"
+}
+
+check_health() {
+    echo "🔍 Checking container: $CONTAINER_NAME"
+    docker ps -a --filter "name=^/$CONTAINER_NAME$"
+    docker logs --tail 20 "$CONTAINER_NAME" 2>/dev/null || true
 }
