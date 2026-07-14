@@ -9,6 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
+    ca-certificates \
     gnupg \
     lsb-release \
     sudo \
@@ -26,7 +27,7 @@ RUN apt-get update && apt-get install -y \
     firefox \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -qO- https://github.com/kasmtech/KasmVNC/releases/download/v1.4.1/kasmvncserver_1.4.1_ubuntu24.04_amd64.deb -O /tmp/kasmvncserver.deb \
+RUN wget -q https://github.com/kasmtech/KasmVNC/releases/download/v1.4.1/kasmvncserver_1.4.1_ubuntu24.04_amd64.deb -O /tmp/kasmvncserver.deb \
     && apt-get update \
     && apt-get install -y /tmp/kasmvncserver.deb \
     && rm -rf /tmp/kasmvncserver.deb \
