@@ -23,7 +23,7 @@ cd Ubuntu
 
 ### Step 2: Make Scripts Executable
 ```bash
-chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh scripts/docker-common.sh scripts/start-vnc.sh
+chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh ngrok-start.sh scripts/docker-common.sh scripts/start-vnc.sh
 ```
 
 ### Step 3: Start the Container
@@ -34,21 +34,40 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh scripts/docker-com
 ### Step 4: Connect!
 
 #### Option A: With a Mobile VNC Client (Recommended for Mobile)
-**Important Note**: This requires your container to be running on a machine with a **public IP address** (like a Google Compute Engine VM or another VPS). Google Cloud Shell does NOT expose ports to the public internet, so you can't use a mobile VNC client directly with Cloud Shell.
+**Using ngrok in Google Cloud Shell**:
 
-1. **Install a VNC Client**:
-   - For Android: Install **AVNC** (free, open source) from Google Play Store
-   - For iOS/Android: Install **RealVNC Viewer** or **RVNC Viewer** from App Store/Play Store
+1. **Install ngrok and Configure Auth Token**:
+   - First, make sure your Ubuntu container is running with `./start.sh`
+   - Go to https://ngrok.com, sign up for a free account, and get your auth token from https://dashboard.ngrok.com/get-started/your-authtoken
+   - In Cloud Shell, set your auth token:
+     ```bash
+     ngrok config add-authtoken YOUR_AUTH_TOKEN
+     ```
 
-2. **Configure Connection**:
+2. **Start ngrok Tunnel**:
+   - Run the ngrok start script:
+     ```bash
+     ./ngrok-start.sh
+     ```
+   - You'll see something like this:
+     ```
+     Forwarding  tcp://0.tcp.ngrok.io:12345 -> localhost:5900
+     ```
+   - Copy the Forwarding address (like `0.tcp.ngrok.io:12345`)
+
+3. **Install a VNC Client on Your Phone**:
+   - For Android: Install **AVNC** (free, open source) or **RealVNC Viewer** from Google Play Store
+   - For iOS: Install **RealVNC Viewer** from App Store
+
+4. **Configure Connection**:
    - Open your VNC client
    - Add a new connection
-   - Enter your server's **public IP address** as the Host
-   - Enter **5900** as the Port
-   - Enter **ubuntu** as the Password (change this later for security!)
+   - Host: Use the ngrok address you copied (like `0.tcp.ngrok.io`)
+   - Port: Use the ngrok port (like `12345`)
+   - Password: `ubuntu` (change this later for security!)
    - Save the connection
 
-3. **Connect**:
+5. **Connect**:
    - Tap the connection to connect
    - You should see the Ubuntu LXDE desktop!
    - You can pinch to zoom, pan around, and use your touchscreen as a mouse!
