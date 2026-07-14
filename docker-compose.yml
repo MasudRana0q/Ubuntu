@@ -1,0 +1,22 @@
+services:
+  ubuntu-desktop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ubuntu-desktop
+    restart: unless-stopped
+    ports:
+      - "6901:6901"
+    environment:
+      - VNC_PORT=6901
+      - VNC_PASSWORD=ubuntu
+      - VNC_RESOLUTION=1280x720
+    volumes:
+      - ./data/home:/home/ubuntu
+      - ./data/shared:/shared
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6901/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
