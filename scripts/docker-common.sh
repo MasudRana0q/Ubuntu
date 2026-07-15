@@ -6,14 +6,18 @@ IMAGE_NAME="${IMAGE_NAME:-ubuntu-desktop-vnc}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
 CONTAINER_NAME="${CONTAINER_NAME:-ubuntu-desktop-vnc}"
+IMAGE_FINGERPRINT_LABEL="ubuntu.build_fingerprint"
 
 # Set Docker config directory to avoid permission issues in Cloud Shell
 export DOCKER_CONFIG="${TMPDIR:-/tmp}/.docker"
 mkdir -p "$DOCKER_CONFIG"
 
 build_image() {
+    local fingerprint
+    fingerprint="$(get_image_fingerprint)"
+
     echo "📦 Building Docker image: $FULL_IMAGE_NAME"
-    docker build -t "$FULL_IMAGE_NAME" .
+    docker build --label "${IMAGE_FINGERPRINT_LABEL}=${fingerprint}" -t "$FULL_IMAGE_NAME" .
 }
 
 pull_image() {
@@ -22,13 +26,31 @@ pull_image() {
 }
 
 ensure_image() {
+    local current_fingerprint existing_fingerprint
+    current_fingerprint="$(get_image_fingerprint)"
+
     if docker image inspect "$FULL_IMAGE_NAME" >/dev/null 2>&1; then
-        echo "✅ Existing Docker image found: $FULL_IMAGE_NAME"
+        existing_fingerprint="$(docker image inspect -f "{{ index .Config.Labels \"$IMAGE_FINGERPRINT_LABEL\" }}" "$FULL_IMAGE_NAME" 2>/dev/null || true)"
+    else
+        existing_fingerprint=""
+    fi
+
+    if [ -n "$existing_fingerprint" ] && [ "$existing_fingerprint" = "$current_fingerprint" ]; then
+        echo "✅ Existing Docker image matches current code: $FULL_IMAGE_NAME"
         return 0
     fi
 
-    echo "📦 No local image found. Building it now..."
+    if [ -n "$existing_fingerprint" ]; then
+        echo "🔄 Docker image is outdated. Rebuilding..."
+    else
+        echo "📦 No matching local image found. Building it now..."
+    fi
+
     build_image
+}
+
+get_image_fingerprint() {
+    sha256sum Dockerfile config/supervisord.conf scripts/start-vnc.sh | sha256sum | awk '{print $1}'
 }
 
 run_container() {

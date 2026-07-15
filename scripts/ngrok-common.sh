@@ -2,7 +2,7 @@
 
 NGROK_CONFIG_DIR="${NGROK_CONFIG_DIR:-/tmp/.ngrok}"
 NGROK_CONFIG_FILE="${NGROK_CONFIG_FILE:-$NGROK_CONFIG_DIR/ngrok.yml}"
-NGROK_TOKEN_FILE="${NGROK_TOKEN_FILE:-$HOME/.ubuntu-ngrok-authtoken}"
+NGROK_TOKEN_FILE="${NGROK_TOKEN_FILE:-$NGROK_CONFIG_DIR/authtoken}"
 
 ensure_ngrok_installed() {
     if command -v ngrok >/dev/null 2>&1; then
@@ -33,11 +33,10 @@ save_ngrok_token() {
         exit 1
     fi
 
-    mkdir -p "$HOME"
+    mkdir -p "$NGROK_CONFIG_DIR"
     printf '%s\n' "$token" > "$NGROK_TOKEN_FILE"
     chmod 600 "$NGROK_TOKEN_FILE"
 
-    mkdir -p "$NGROK_CONFIG_DIR"
     ngrok config add-authtoken "$token" --config "$NGROK_CONFIG_FILE" >/dev/null
 
     echo "✅ ngrok token save হয়েছে।"
