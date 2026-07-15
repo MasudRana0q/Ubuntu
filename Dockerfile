@@ -37,6 +37,19 @@ RUN ARCH="$(dpkg --print-architecture)" \
     && wget -O /tmp/firefox.tar.xz "https://download.mozilla.org/?product=firefox-latest-ssl&os=${FIREFOX_ARCH}&lang=en-US" \
     && tar -xJf /tmp/firefox.tar.xz -C /opt/ \
     && ln -sf /opt/firefox/firefox /usr/local/bin/firefox \
+    && install -D /opt/firefox/browser/chrome/icons/default/default128.png /usr/share/pixmaps/firefox.png \
+    && cat > /usr/share/applications/firefox.desktop <<'EOF'
+[Desktop Entry]
+Version=1.0
+Name=Firefox
+Comment=Browse the Web
+Exec=/usr/local/bin/firefox %u
+Icon=firefox
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
+StartupNotify=true
+EOF
     && rm -f /tmp/firefox.tar.xz
 
 # Create user
@@ -58,8 +71,7 @@ RUN chmod +x /usr/local/bin/start-vnc.sh
 # Environment variables
 ENV VNC_PORT=5900
 ENV NO_VNC_PORT=6900
-ENV VNC_PASSWORD=ubuntu
-ENV VNC_RESOLUTION=1024x900
+ENV VNC_RESOLUTION=1024x960
 ENV VNC_DEPTH=24
 
 # Ports and volumes

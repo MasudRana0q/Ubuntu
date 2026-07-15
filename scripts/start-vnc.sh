@@ -3,6 +3,8 @@
 mkdir -p /home/ubuntu/.vnc
 chown -R ubuntu:ubuntu /home/ubuntu/.vnc
 
+VNC_PASSWORD="${VNC_PASSWORD:-ubuntu}"
+
 if [ ! -f /home/ubuntu/.vnc/passwd ]; then
     echo "${VNC_PASSWORD}" | vncpasswd -f > /home/ubuntu/.vnc/passwd
 fi
@@ -19,7 +21,14 @@ EOF
 chmod +x /home/ubuntu/.vnc/xstartup
 chown ubuntu:ubuntu /home/ubuntu/.vnc/xstartup
 
+mkdir -p /home/ubuntu/Desktop
+if [ -f /usr/share/applications/firefox.desktop ]; then
+    cp /usr/share/applications/firefox.desktop /home/ubuntu/Desktop/Firefox.desktop
+    chmod +x /home/ubuntu/Desktop/Firefox.desktop
+fi
+
 chown -R ubuntu:ubuntu /home/ubuntu/.vnc
+chown -R ubuntu:ubuntu /home/ubuntu/Desktop
 
 export USER=ubuntu
 export HOME=/home/ubuntu
