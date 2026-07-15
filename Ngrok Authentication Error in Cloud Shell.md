@@ -49,7 +49,7 @@ chmod +x start.sh stop.sh restart.sh update.sh healthcheck.sh web-tunnel.sh tcp-
 
 ./setup-ngrok.sh YOUR_NGROK_AUTHTOKEN
 
-HOST_UPLOAD_FOLDER=$HOME IMAGE_NAME=masudgolp/ubuntu-desktop-vnc ./start.sh mobile-pull
+HOST_UPLOAD_FOLDER=$HOME/cloudshell-uploads IMAGE_NAME=masudgolp/ubuntu-desktop-vnc ./start.sh mobile-pull
 ```
 
 **এখানে কী হবে**
@@ -91,7 +91,7 @@ docker push masudgolp/ubuntu-desktop-vnc:latest
 - build ছাড়া run:
 
 ```bash
-HOST_UPLOAD_FOLDER=$HOME IMAGE_NAME=masudgolp/ubuntu-desktop-vnc ./start.sh mobile-pull
+HOST_UPLOAD_FOLDER=$HOME/cloudshell-uploads IMAGE_NAME=masudgolp/ubuntu-desktop-vnc ./start.sh mobile-pull
 ```
 
 চাইলে next message-এ আমি আপনাকে একদম final ২টা ready block দেব:
@@ -99,4 +99,3 @@ HOST_UPLOAD_FOLDER=$HOME IMAGE_NAME=masudgolp/ubuntu-desktop-vnc ./start.sh mobi
 - ১টা future-এ শুধু pull + run করার জন্য
 
 ---
-
