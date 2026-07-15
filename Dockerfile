@@ -38,18 +38,18 @@ RUN ARCH="$(dpkg --print-architecture)" \
     && tar -xJf /tmp/firefox.tar.xz -C /opt/ \
     && ln -sf /opt/firefox/firefox /usr/local/bin/firefox \
     && install -D /opt/firefox/browser/chrome/icons/default/default128.png /usr/share/pixmaps/firefox.png \
-    && cat > /usr/share/applications/firefox.desktop <<'EOF'
-[Desktop Entry]
-Version=1.0
-Name=Firefox
-Comment=Browse the Web
-Exec=/usr/local/bin/firefox %u
-Icon=firefox
-Terminal=false
-Type=Application
-Categories=Network;WebBrowser;
-StartupNotify=true
-EOF
+    && printf '%s\n' \
+        '[Desktop Entry]' \
+        'Version=1.0' \
+        'Name=Firefox' \
+        'Comment=Browse the Web' \
+        'Exec=/usr/local/bin/firefox %u' \
+        'Icon=firefox' \
+        'Terminal=false' \
+        'Type=Application' \
+        'Categories=Network;WebBrowser;' \
+        'StartupNotify=true' \
+        > /usr/share/applications/firefox.desktop \
     && rm -f /tmp/firefox.tar.xz
 
 # Create user
