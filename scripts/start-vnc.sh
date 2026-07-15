@@ -28,6 +28,7 @@ if [ -f /usr/share/applications/firefox.desktop ]; then
 fi
 
 mkdir -p /cloudshell-uploads
+chown -R ubuntu:ubuntu /cloudshell-uploads
 ln -sfn /cloudshell-uploads /home/ubuntu/Desktop/CloudShell-Uploads
 
 chown -R ubuntu:ubuntu /home/ubuntu/.vnc
