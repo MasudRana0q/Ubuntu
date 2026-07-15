@@ -4,21 +4,27 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/scripts/docker-common.sh"
 
+MODE="${1:-default}"
+
 # Create data directories
 mkdir -p data/home data/shared
 
-# Check if we need to rebuild the image
-echo "🔍 Checking if we need to rebuild the image..."
-# We'll rebuild if Dockerfile, supervisord.conf, or start-vnc.sh changed
-# For simplicity, we'll rebuild every time for now, but we can optimize later
-# But for now, let's just proceed
+# Decide whether to reuse, rebuild, or pull the image
+echo "🔍 Checking Docker image mode..."
 
 # Stop existing container if running
 stop_container
 
-# Build and run
-echo "📦 Building Docker image (using cache if possible)..."
-build_image && run_container
+if [ "$MODE" = "rebuild" ] || [ "$MODE" = "mobile-rebuild" ]; then
+    echo "📦 Rebuilding Docker image..."
+    build_image && run_container
+elif [ "$MODE" = "pull" ] || [ "$MODE" = "mobile-pull" ]; then
+    echo "📥 Pulling Docker image instead of building..."
+    pull_image && run_container
+else
+    echo "📦 Checking local Docker image..."
+    ensure_image && run_container
+fi
 
 if [ $? -eq 0 ]; then
     echo -e "\n✅ Container started successfully!"
@@ -28,6 +34,14 @@ if [ $? -eq 0 ]; then
     echo -e "   3. On Google Cloud Shell: Use Web Preview on port 6900"
     echo -e "   4. For mobile access from anywhere (FREE): Run ./web-tunnel.sh, then open the URL + /vnc.html!"
     echo -e "   💡 Tip: On mobile, just open the ngrok URL in your browser!"
+
+    if [ "$MODE" = "mobile" ] || [ "$MODE" = "mobile-rebuild" ] || [ "$MODE" = "mobile-pull" ]; then
+        echo -e "\n⏳ Waiting for the container to become ready..."
+        sleep 20
+        "$SCRIPT_DIR/healthcheck.sh"
+        echo -e "\n📱 Opening RVNC mobile tunnel..."
+        exec "$SCRIPT_DIR/tcp-tunnel.sh"
+    fi
 else
     echo -e "\n❌ Failed to start container!"
     exit 1

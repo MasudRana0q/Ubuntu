@@ -2,16 +2,33 @@
 
 # Common Docker helper functions for Ubuntu Desktop project
 
-IMAGE_NAME="ubuntu-desktop-vnc"
-CONTAINER_NAME="ubuntu-desktop-vnc"
+IMAGE_NAME="${IMAGE_NAME:-ubuntu-desktop-vnc}"
+IMAGE_TAG="${IMAGE_TAG:-latest}"
+FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
+CONTAINER_NAME="${CONTAINER_NAME:-ubuntu-desktop-vnc}"
 
 # Set Docker config directory to avoid permission issues in Cloud Shell
 export DOCKER_CONFIG="${TMPDIR:-/tmp}/.docker"
 mkdir -p "$DOCKER_CONFIG"
 
 build_image() {
-    echo "📦 Building Docker image: $IMAGE_NAME:latest"
-    docker build -t "$IMAGE_NAME:latest" .
+    echo "📦 Building Docker image: $FULL_IMAGE_NAME"
+    docker build -t "$FULL_IMAGE_NAME" .
+}
+
+pull_image() {
+    echo "📥 Pulling Docker image: $FULL_IMAGE_NAME"
+    docker pull "$FULL_IMAGE_NAME"
+}
+
+ensure_image() {
+    if docker image inspect "$FULL_IMAGE_NAME" >/dev/null 2>&1; then
+        echo "✅ Existing Docker image found: $FULL_IMAGE_NAME"
+        return 0
+    fi
+
+    echo "📦 No local image found. Building it now..."
+    build_image
 }
 
 run_container() {
@@ -23,7 +40,7 @@ run_container() {
         -p 6900:6900 \
         -v "$(pwd)/data/home:/home/ubuntu" \
         -v "$(pwd)/data/shared:/shared" \
-        "$IMAGE_NAME:latest"
+        "$FULL_IMAGE_NAME"
 }
 
 stop_container() {

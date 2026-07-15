@@ -22,16 +22,22 @@ RUN apt-get update && apt-get install -y \
     tigervnc-xorg-extension \
     lxde \
     lxde-common \
-    firefox \
     novnc \
     websockify \
-    && install -d -m 0755 /etc/apt/keyrings \
-    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg \
-    && chmod a+r /etc/apt/keyrings/google-chrome.gpg \
-    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
+
+# Install the latest Firefox directly from Mozilla so the container is not
+# tied to Ubuntu's snap packaging.
+RUN ARCH="$(dpkg --print-architecture)" \
+    && case "$ARCH" in \
+        amd64) FIREFOX_ARCH="linux64" ;; \
+        arm64) FIREFOX_ARCH="linux-aarch64" ;; \
+        *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
+    esac \
+    && wget -O /tmp/firefox.tar.xz "https://download.mozilla.org/?product=firefox-latest-ssl&os=${FIREFOX_ARCH}&lang=en-US" \
+    && tar -xJf /tmp/firefox.tar.xz -C /opt/ \
+    && ln -sf /opt/firefox/firefox /usr/local/bin/firefox \
+    && rm -f /tmp/firefox.tar.xz
 
 # Create user
 RUN useradd -m -s /bin/bash ubuntu \
@@ -53,7 +59,7 @@ RUN chmod +x /usr/local/bin/start-vnc.sh
 ENV VNC_PORT=5900
 ENV NO_VNC_PORT=6900
 ENV VNC_PASSWORD=ubuntu
-ENV VNC_RESOLUTION=1080x2340
+ENV VNC_RESOLUTION=1024x900
 ENV VNC_DEPTH=24
 
 # Ports and volumes
