@@ -59,20 +59,23 @@ IMAGE_NAME=masudgolp/ubuntu-desktop-vnc ./start.sh mobile-pull
 ```
 
 ### Mount Your Cloud Shell Upload Folder
-To see files you upload to your Google Cloud Shell home directory directly inside the container:
+This now works automatically.
 
-1. Set the environment variable and start:
+1. Start normally:
    ```bash
-   # Replace /home/masud0q with your actual Cloud Shell home path
-   export HOST_UPLOAD_FOLDER="/home/masud0q"
    ./start.sh mobile
    ```
 
-2. Inside the container/VNC OS:
-   - Open file manager and go to `/cloudshell-uploads/`
-   - All your uploaded files will be there!
+2. Upload files in Google Cloud Shell to:
+   ```bash
+   ~/cloudshell-uploads
+   ```
 
-**Note**: For safety, this is optional and defaults off. Use only if you want this feature.
+3. Inside the container/VNC OS:
+   - Open the `CloudShell-Uploads` shortcut on the desktop, or
+   - Open `/cloudshell-uploads/` in the file manager
+
+This folder is persistent because it lives in your Cloud Shell home directory.
 
 #### Option A: With RVNC Viewer (Recommended for Mobile)
 **Using ngrok TCP tunnel in Google Cloud Shell**:

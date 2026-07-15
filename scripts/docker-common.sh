@@ -8,9 +8,8 @@ FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
 CONTAINER_NAME="${CONTAINER_NAME:-ubuntu-desktop-vnc}"
 IMAGE_FINGERPRINT_LABEL="ubuntu.build_fingerprint"
 
-# Optional host upload folder (set via HOST_UPLOAD_FOLDER env var)
-# Example: export HOST_UPLOAD_FOLDER="/home/masud0q" before starting
-HOST_UPLOAD_FOLDER="${HOST_UPLOAD_FOLDER:-}"
+# Permanent Cloud Shell upload folder. Can still be overridden via HOST_UPLOAD_FOLDER.
+HOST_UPLOAD_FOLDER="${HOST_UPLOAD_FOLDER:-$HOME/cloudshell-uploads}"
 HOST_UPLOAD_FOLDER_IN_CONTAINER="/cloudshell-uploads"
 
 # Set Docker config directory to avoid permission issues in Cloud Shell
@@ -61,7 +60,9 @@ get_image_fingerprint() {
 run_container() {
     echo "🚀 Starting container: $CONTAINER_NAME"
 
-    # Build docker run command with optional volumes
+    mkdir -p "$HOST_UPLOAD_FOLDER"
+
+    # Build docker run command with persistent volumes
     local docker_cmd=(
         "docker" "run" "-d"
         "--name" "$CONTAINER_NAME"
@@ -70,13 +71,11 @@ run_container() {
         "-p" "6900:6900"
         "-v" "$(pwd)/data/home:/home/ubuntu"
         "-v" "$(pwd)/data/shared:/shared"
+        "-v" "$HOST_UPLOAD_FOLDER:$HOST_UPLOAD_FOLDER_IN_CONTAINER"
     )
 
-    # Add optional upload folder if set
-    if [ -n "$HOST_UPLOAD_FOLDER" ] && [ -d "$HOST_UPLOAD_FOLDER" ]; then
-        echo "📁 Mounting host upload folder: $HOST_UPLOAD_FOLDER -> $HOST_UPLOAD_FOLDER_IN_CONTAINER"
-        docker_cmd+=("-v" "$HOST_UPLOAD_FOLDER:$HOST_UPLOAD_FOLDER_IN_CONTAINER")
-    fi
+    echo "📁 Cloud Shell upload folder: $HOST_UPLOAD_FOLDER"
+    echo "📂 Inside Ubuntu OS: $HOST_UPLOAD_FOLDER_IN_CONTAINER"
 
     # Add image name
     docker_cmd+=("$FULL_IMAGE_NAME")

@@ -27,6 +27,9 @@ if [ -f /usr/share/applications/firefox.desktop ]; then
     chmod +x /home/ubuntu/Desktop/Firefox.desktop
 fi
 
+mkdir -p /cloudshell-uploads
+ln -sfn /cloudshell-uploads /home/ubuntu/Desktop/CloudShell-Uploads
+
 chown -R ubuntu:ubuntu /home/ubuntu/.vnc
 chown -R ubuntu:ubuntu /home/ubuntu/Desktop
 
