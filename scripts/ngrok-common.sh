@@ -3,6 +3,9 @@
 NGROK_CONFIG_DIR="${NGROK_CONFIG_DIR:-/tmp/.ngrok}"
 NGROK_CONFIG_FILE="${NGROK_CONFIG_FILE:-$NGROK_CONFIG_DIR/ngrok.yml}"
 NGROK_TOKEN_FILE="${NGROK_TOKEN_FILE:-$NGROK_CONFIG_DIR/authtoken}"
+NGROK_PID_FILE="${NGROK_PID_FILE:-$NGROK_CONFIG_DIR/ngrok.pid}"
+NGROK_LOG_FILE="${NGROK_LOG_FILE:-$NGROK_CONFIG_DIR/ngrok.log}"
+NGROK_API_URL="${NGROK_API_URL:-http://127.0.0.1:4040/api/tunnels}"
 
 ensure_ngrok_installed() {
     if command -v ngrok >/dev/null 2>&1; then
@@ -65,18 +68,113 @@ ensure_ngrok_auth() {
     exit 1
 }
 
+stop_ngrok_tunnel() {
+    if [ -f "$NGROK_PID_FILE" ]; then
+        local pid
+        pid="$(cat "$NGROK_PID_FILE" 2>/dev/null)"
+        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null || true
+            sleep 1
+        fi
+        rm -f "$NGROK_PID_FILE"
+    fi
+}
+
+extract_ngrok_public_url() {
+    local protocol="$1"
+    curl -s "$NGROK_API_URL" | grep -o "\"public_url\":\"${protocol}:[^\"]*\"" | head -n 1 | cut -d '"' -f4
+}
+
+wait_for_ngrok_public_url() {
+    local protocol="$1"
+    local public_url=""
+    local attempt=0
+
+    while [ "$attempt" -lt 15 ]; do
+        public_url="$(extract_ngrok_public_url "$protocol")"
+        if [ -n "$public_url" ]; then
+            printf '%s\n' "$public_url"
+            return 0
+        fi
+
+        sleep 1
+        attempt=$((attempt + 1))
+    done
+
+    return 1
+}
+
+start_ngrok_background() {
+    local protocol="$1"
+    local port="$2"
+
+    mkdir -p "$NGROK_CONFIG_DIR"
+    stop_ngrok_tunnel
+    rm -f "$NGROK_LOG_FILE"
+
+    nohup ngrok "$protocol" "$port" --log=stdout --config "$NGROK_CONFIG_FILE" >"$NGROK_LOG_FILE" 2>&1 </dev/null &
+    echo $! > "$NGROK_PID_FILE"
+}
+
 start_ngrok_tcp() {
+    local public_url
+    local host
+    local port
+
     echo ""
     echo "🚀 Starting ngrok TCP tunnel..."
-    echo "💡 RVNC Viewer-এর জন্য host এবং port নিচে দেখাবে।"
+    echo "💡 RVNC Viewer-এর জন্য host এবং port নিচে normal output হিসেবে দেখাবে।"
     echo ""
-    ngrok tcp 5900 --config "$NGROK_CONFIG_FILE"
+
+    start_ngrok_background tcp 5900
+
+    public_url="$(wait_for_ngrok_public_url tcp)"
+    if [ -z "$public_url" ]; then
+        echo "❌ ngrok tunnel ready হয়নি।"
+        echo "📄 Log file: $NGROK_LOG_FILE"
+        tail -n 20 "$NGROK_LOG_FILE" 2>/dev/null || true
+        exit 1
+    fi
+
+    host="${public_url#tcp://}"
+    port="${host##*:}"
+    host="${host%:*}"
+
+    echo "✅ ngrok tunnel ready"
+    echo "Host: $host"
+    echo "Port: $port"
+    echo "Password: ubuntu"
+    echo ""
+    echo "🛑 Tunnel বন্ধ করতে চাইলে:"
+    echo "   ./stop.sh"
+    echo ""
+    echo "📄 ngrok log: $NGROK_LOG_FILE"
 }
 
 start_ngrok_http() {
+    local public_url
+
     echo ""
     echo "🚀 Starting ngrok HTTP tunnel..."
     echo "💡 URL নিচে দেখাবে। শেষে /vnc.html যোগ করবেন।"
     echo ""
-    ngrok http 6900 --config "$NGROK_CONFIG_FILE"
+
+    start_ngrok_background http 6900
+
+    public_url="$(wait_for_ngrok_public_url https)"
+    if [ -z "$public_url" ]; then
+        echo "❌ ngrok tunnel ready হয়নি।"
+        echo "📄 Log file: $NGROK_LOG_FILE"
+        tail -n 20 "$NGROK_LOG_FILE" 2>/dev/null || true
+        exit 1
+    fi
+
+    echo "✅ ngrok tunnel ready"
+    echo "URL: $public_url/vnc.html"
+    echo "Password: ubuntu"
+    echo ""
+    echo "🛑 Tunnel বন্ধ করতে চাইলে:"
+    echo "   ./stop.sh"
+    echo ""
+    echo "📄 ngrok log: $NGROK_LOG_FILE"
 }

@@ -3,6 +3,7 @@
 # Load common helper functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/scripts/docker-common.sh"
+source "$SCRIPT_DIR/scripts/ngrok-common.sh"
 
 MODE="${1:-default}"
 
@@ -13,6 +14,7 @@ mkdir -p data/home data/shared
 echo "🔍 Checking Docker image mode..."
 
 # Stop existing container if running
+stop_ngrok_tunnel
 stop_container
 
 if [ "$MODE" = "rebuild" ] || [ "$MODE" = "mobile-rebuild" ]; then
@@ -40,7 +42,7 @@ if [ $? -eq 0 ]; then
         sleep 20
         "$SCRIPT_DIR/healthcheck.sh"
         echo -e "\n📱 Opening RVNC mobile tunnel..."
-        exec "$SCRIPT_DIR/tcp-tunnel.sh"
+        "$SCRIPT_DIR/tcp-tunnel.sh"
     fi
 else
     echo -e "\n❌ Failed to start container!"
